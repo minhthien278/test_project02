@@ -83,18 +83,24 @@ pipeline {
             }
         }
 
-        stage ('Login docker hub') {
+        stage('Login Docker Hub') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh """
+                // Thực hiện đăng nhập Docker Hub
+                        def loginStatus = sh(script: """
                             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        """
-                    }
+                         """, returnStatus: true)  // Trả về mã trạng thái của lệnh
 
+                // Kiểm tra mã trạng thái, nếu không phải 0 (thất bại), báo lỗi
+                        if (loginStatus != 0) {
+                             error "Docker login failed!"  // Dừng pipeline và báo lỗi
+                        }
+                    }
                 }
             }
         }
+
         
         stage('Build and push docker image') {
             when {
