@@ -78,7 +78,7 @@ pipeline {
                     def services = env.CHANGED_SERVICES.split(',')
                     for (service in services) {
                         echo "Building: ${service}"
-                        sh "mvn -pl ${service} -am package -DskipTests"
+                        sh "./mvnw -pl ${service} -am package -DskipTests"
                     }  
                 }
             }
@@ -86,7 +86,7 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                withCredentials([string(credentialsId: 'docker-hub-credentials', variable: 'DOCKER_PASS')]) {
+                withCredentials([string(credentialsId: 'docker-credentials', variable: 'DOCKER_PASS')]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                     '''
