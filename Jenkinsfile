@@ -90,12 +90,15 @@ pipeline {
                 // Thực hiện đăng nhập Docker Hub
                         def loginStatus = sh(script: """
                             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                         """, returnStatus: true)  // Trả về mã trạng thái của lệnh
-
+                         """, returnStatus: true,returnStdout: true)  // Trả về mã trạng thái của lệnh
+                        echo "Docker login status: ${loginStatus}"  // In ra mã trạng thái để kiểm tra
                 // Kiểm tra mã trạng thái, nếu không phải 0 (thất bại), báo lỗi
                         if (loginStatus != 0) {
                              error "Docker login failed!"  // Dừng pipeline và báo lỗi
                         }
+                        if (loginOutput.contains('Login Succeeded') == false) {
+                    error "Docker login failed! Output: ${loginOutput}"
+                }
                     }
                 }
             }
