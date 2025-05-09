@@ -61,7 +61,7 @@ pipeline {
                     def services = env.CHANGED_SERVICES.split(',')
                     for (service in services) {
                         echo "Testing: ${service}"
-                        sh "mvn clean verify -pl ${service}"
+                        sh "./mvnw clean verify -pl ${service}"
                     }   
                 }
             }
