@@ -12,6 +12,7 @@ pipeline {
             spring-petclinic-vets-service
             spring-petclinic-visits-service
         """
+        DOCKER_USER = 'vuden'
     }
 
     options {
@@ -83,23 +84,12 @@ pipeline {
             }
         }
 
-        stage('Login Docker Hub') {
+        stage('Docker Login') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                // Thực hiện đăng nhập Docker Hub
-                        def loginStatus = sh(script: """
-                            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                         """, returnStatus: true,returnStdout: true)  // Trả về mã trạng thái của lệnh
-                        echo "Docker login status: ${loginStatus}"  // In ra mã trạng thái để kiểm tra
-                // Kiểm tra mã trạng thái, nếu không phải 0 (thất bại), báo lỗi
-                        if (loginStatus != 0) {
-                             error "Docker login failed!"  // Dừng pipeline và báo lỗi
-                        }
-                        if (loginOutput.contains('Login Succeeded') == false) {
-                    error "Docker login failed! Output: ${loginOutput}"
-                }
-                    }
+                withCredentials([string(credentialsId: 'docker-hub-credentials', variable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
                 }
             }
         }
