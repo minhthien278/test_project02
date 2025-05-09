@@ -43,7 +43,7 @@
         <container.platform>linux/amd64</container.platform>
         <!-- The -load option is a shortcut for or -output=type=docker -->
         <!-- Could be changed by the -push option !-->
-        
+        <container.build.extraarg>--load</container.build.extraarg>
     </properties>
 
     <dependencyManagement>
