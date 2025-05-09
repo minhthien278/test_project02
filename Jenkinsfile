@@ -24,7 +24,12 @@ pipeline {
                 checkout scm
             }
         }
-
+        stage('Check Maven') {
+            steps {
+                sh 'which mvn'
+                sh 'mvn -v'
+            }
+        }
         stage('Detect Changes') {
             steps {
                 script {
