@@ -86,7 +86,7 @@ pipeline {
         stage('Login Docker Hub') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                 // Thực hiện đăng nhập Docker Hub
                         def loginStatus = sh(script: """
                             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
