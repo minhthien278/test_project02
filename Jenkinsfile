@@ -12,6 +12,9 @@ pipeline {
             spring-petclinic-vets-service
             spring-petclinic-visits-service
         """
+        // Define missing environment variables
+        DOCKER_REGISTRY = "vuden"  // Using your docker hub username from the original script
+        CONTAINER_TAG = "\${BUILD_NUMBER}-\${GIT_COMMIT.substring(0,7)}"  // Using build number and git commit as tag
     }
 
     options {
@@ -59,10 +62,32 @@ pipeline {
             steps {
                 script {
                     def services = env.CHANGED_SERVICES.split(',')
+                    def testResults = [:]
+                    def hasFailures = false
+                    
+                    // Run tests for all services, even if some fail
                     for (service in services) {
                         echo "Testing: ${service}"
-                        sh "./mvnw clean verify -pl ${service}"
-                    }   
+                        try {
+                            sh "./mvnw clean verify -pl ${service}"
+                            testResults[service] = "SUCCESS"
+                        } catch (Exception e) {
+                            testResults[service] = "FAILED"
+                            hasFailures = true
+                            echo "Test failed for ${service}: ${e.message}"
+                        }
+                    }
+                    
+                    // Report test results summary
+                    echo "Test results summary:"
+                    testResults.each { service, result ->
+                        echo "${service}: ${result}"
+                    }
+                    
+                    // Fail the build if any test failed
+                    if (hasFailures) {
+                        error "Some tests failed. Check the logs for details."
+                    }
                 }
             }
         }
@@ -93,6 +118,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Build and push docker image') {
             when {
                 expression {
@@ -105,14 +131,32 @@ pipeline {
                     def services = env.CHANGED_SERVICES.split(',')
 
                     for (service in services) {
-                        def imageName = "vuden/${service}:${commitId}"
+                        def imageName = "${DOCKER_REGISTRY}/${service}:${commitId}"
                         echo "🚀 Building and pushing image for ${service} with tag ${commitId}"
-                        sh """ ./mvnw clean install -pl ${service} -Dmaven.test.skip=true -P buildDocker 
-                            -Ddocker.image.prefix=${env.DOCKER_REGISTRY} -Ddocker.image.tag=${CONTAINER_TAG} -Dcontainer.build.extraarg=\"--push\""
+                        
+                        // Using the defined environment variables
+                        sh """
+                            ./mvnw clean install -pl ${service} -Dmaven.test.skip=true -P buildDocker \
+                            -Ddocker.image.prefix=${DOCKER_REGISTRY} \
+                            -Ddocker.image.tag=${commitId} \
+                            -Dcontainer.build.extraarg="--push"
                         """
                     }
                 }
             }
+        }
+    }
+    
+    post {
+        always {
+            // Clean up after build
+            cleanWs()
+        }
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed! Check the logs for details."
         }
     }
 }
