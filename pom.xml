@@ -186,7 +186,7 @@
                                             <argument>${container.platform}</argument>
                                             <argument>${container.build.extraarg}</argument>
                                             <argument>-t</argument>
-                                            <argument>${docker.image.prefix}/${project.artifactId}</argument>
+                                            <argument>${docker.image.prefix}/${project.artifactId}:${docker.image.tag}</argument>
                                             <argument>${project.build.directory}</argument>
                                         </arguments>
                                     </configuration>
