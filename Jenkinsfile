@@ -85,8 +85,9 @@ pipeline {
         }
 
         stage('Docker Login') {
-            sh 'whoami'
+            
             steps {
+                sh 'whoami'
                 withCredentials([string(credentialsId: 'docker-credentials', variable: 'DOCKER_PASS')]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
