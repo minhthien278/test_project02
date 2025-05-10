@@ -184,7 +184,7 @@
                                             <argument>EXPOSED_PORT=${docker.image.exposed.port}</argument>
                                             <argument>--platform</argument>
                                             <argument>${container.platform}</argument>
-                                            <argument>${container.build.extraarg}</argument>
+                                            <argument>buildx build --load ${container.build.extraarg}</argument>
                                             <argument>-t</argument>
                                             <argument>${docker.image.prefix}/${project.artifactId}:${docker.image.tag}</argument>
                                             <argument>${project.build.directory}</argument>
