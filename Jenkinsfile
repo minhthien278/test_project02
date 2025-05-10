@@ -115,7 +115,7 @@ pipeline {
                             ./mvnw clean install -pl ${service} -Dmaven.test.skip=true -P buildDocker \
                             -Ddocker.image.prefix=${env.DOCKER_USER} \
                             -Ddocker.image.tag=${commitId} \
-                            -Dcontainer.build.extraarg=\"--push\"
+                            -Dcontainer.build.extraarg=--push
                         """
                     }
                 }
