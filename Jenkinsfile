@@ -85,6 +85,7 @@ pipeline {
         }
 
         stage('Docker Login') {
+            sh 'whoami'
             steps {
                 withCredentials([string(credentialsId: 'docker-credentials', variable: 'DOCKER_PASS')]) {
                     sh '''
