@@ -44,7 +44,7 @@
         <container.platform>linux/amd64</container.platform>
         <!-- The -load option is a shortcut for or -output=type=docker -->
         <!-- Could be changed by the -push option !-->
-        <container.build.extraarg>--push</container.build.extraarg>
+        <container.build.extraarg>--load</container.build.extraarg>
     </properties>
 
     <dependencyManagement>
@@ -176,7 +176,6 @@
                                         <executable>${container.executable}</executable>
                                         <workingDirectory>${docker.image.dockerfile.dir}</workingDirectory>
                                         <arguments>
-                                            <argument>buildx</argument>
                                             <argument>build</argument>
                                             <argument>-f</argument>
                                             <argument>Dockerfile</argument>
