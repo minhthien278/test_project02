@@ -111,7 +111,7 @@ pipeline {
                     for (service in services) {
                         def imageName = "vuden/${service}:${commitId}"
                         echo "🚀 Building and pushing image for ${service} with tag ${commitId}"
-                        sh "./mvnw clean install -pl ${service} -Dmaven.test.skip=true -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName} -Dcontainer.build.extraarg=\"--push\""
+                        sh "./mvnw clean install -pl ${service} -Dmaven.test.skip=true -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName}"
                         //sh "cd ${service} && ../mvnw clean install -P BuilDocker "
                     }
                 }
