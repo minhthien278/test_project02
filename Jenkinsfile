@@ -113,6 +113,7 @@ pipeline {
                         echo "🚀 Building and pushing image for ${service} with tag ${commitId}"
                         // sh "./mvnw clean install -pl ${service} -Dmaven.test.skip=true -P buildDocker -Ddocker.image.prefix=${env.DOCKER_REGISTRY} -Ddocker.image.tag=${CONTAINER_TAG} -Dcontainer.build.extraarg=\"--push\""
                         sh "cd ${service} && ../mvnw clean install -P BuilDocker -Ddocker.image.prefix=${env.DOCKER_REGISTRY} -Ddocker.image.tag=${CONTAINER_TAG}"
+                        
                     }
                 }
             }
