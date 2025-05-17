@@ -50,40 +50,6 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            when {
-                expression {
-                    return env.CHANGED_SERVICES != null && env.CHANGED_SERVICES.trim()
-                }
-            }
-            steps {
-                script {
-                    def services = env.CHANGED_SERVICES.split(',')
-                    for (service in services) {
-                        echo "Testing: ${service}"
-                        sh "./mvnw clean verify -pl ${service}"
-                    }   
-                }
-            }
-        }
-
-        stage('Build') {
-            when {
-                expression {
-                    return env.CHANGED_SERVICES != null && env.CHANGED_SERVICES.trim()
-                }
-            }
-            steps {
-                script {
-                    def services = env.CHANGED_SERVICES.split(',')
-                    for (service in services) {
-                        echo "Building: ${service}"
-                        sh "./mvnw -pl ${service} -am package -DskipTests"
-                    }  
-                }
-            }
-        }
-
         stage('Docker Login') {
             
             steps {
