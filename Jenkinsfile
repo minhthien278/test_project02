@@ -25,7 +25,7 @@ pipeline {
                     def tagName =sh (script: " git tag --points-at HEAD", returnStdout: true).trim()
                     echo "A new release found with tag ${env.TAG_NAME}"
                     env.CHANGED_SERVICES = env.SERVICES
-                    end.TAG_NAME = tagName
+                    env.TAG_NAME = tagName
                 }
             }
         }
