@@ -90,7 +90,7 @@ pipeline {
 
                     for (service in services) {
                         def imageName = "vuden/${service}:${commitId}"
-                        echo "🚀 Building and pushing image for ${service} with tag ${commitId}"
+                        echo "🚀 Building and pushing image for ${service} with tag ${imageTag}"
                         // sh "./mvnw clean install -pl ${service} -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName}"
                         //sh "cd ${service} && ../mvnw clean install -P BuilDocker "
                         sh "docker build -t ${DOCKER_USER}/${service}:${imageTag} -f ../docker/Dockerfile -- build-arg ARTIFACT_NAME=target/${service}-3.4.1 -- build-arg EXPOSE_PORT=8080" 
