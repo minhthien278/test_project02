@@ -19,16 +19,16 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Detect Release') {
-            steps {
-                script {
-                    def tagName =sh (script: " git tag --points-at HEAD", returnStdout: true).trim()
-                    env.CHANGED_SERVICES = env.SERVICES
-                    env.TAG_NAME = tagName
-                    echo "A new release found with tag ${env.TAG_NAME}"
+            stage('Detect Release') {
+                steps {
+                    script {
+                        def tagName = sh(script: "git tag --points-at HEAD", returnStdout: true).trim()
+                        env.CHANGED_SERVICES = env.SERVICES
+                        env.TAG_NAME = tagName
+                        echo "A new release found with tag ${env.TAG_NAME}"
+                    }
                 }
             }
-        }
         stage('Detect Changes') {
             when { expression { return !env.TAG_NAME } }
             steps {
@@ -98,4 +98,3 @@ pipeline {
         }
     }
 }
-//testtag
