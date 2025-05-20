@@ -94,6 +94,7 @@ pipeline {
                         //sh "cd ${service} && ../mvnw clean install -P BuilDocker "
                         sh "./mvnw clean install -pl ${service} -DskipTests"   
                         sh """
+                            cd ${service} && \\
                             docker build \\
                             -t ${DOCKER_USER}/${service}:${imageTag} \\
                             -f ./docker/Dockerfile \\
