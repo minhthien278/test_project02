@@ -85,6 +85,7 @@ pipeline {
                     } else {
                         imageTag = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
                     }
+                    echo "${env.SERVICES}"
                     if (env.GIT_BRANCH == 'origin/main' || env.BRANCH_NAME == 'main') { 
                         services = env.SERVICES.split()
                     }
@@ -92,8 +93,6 @@ pipeline {
 
                     for (service in services) {
                         echo "🚀 Building and pushing image for ${service} with tag ${imageTag}"
-                        // sh "./mvnw clean install -pl ${service} -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName}"
-                        //sh "cd ${service} && ../mvnw clean install -P BuilDocker "
                         sh "./mvnw clean install -pl ${service} -DskipTests"   
                         sh """
                             cd ${service} && \\
