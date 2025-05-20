@@ -12,10 +12,7 @@ pipeline {
             spring-petclinic-vets-service
             spring-petclinic-visits-service
         """
-    }
-
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '10'))
+        DOCKER_USER = 'vuden'
     }
 
     stages {
@@ -24,7 +21,15 @@ pipeline {
                 checkout scm
             }
         }
-
+        stage('Detect Release') {
+            when { expression { return env.TAG_NAME } }
+            steps {
+                script {
+                    echo "A new release found with tag ${env.TAG_NAME}"
+                    env.CHANGED_SERVICES = env.SERVICES
+                }
+            }
+        }
         stage('Detect Changes') {
             steps {
                 script {
@@ -50,39 +55,23 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Docker Login') {
             when {
                 expression {
                     return env.CHANGED_SERVICES != null && env.CHANGED_SERVICES.trim()
                 }
             }
             steps {
-                script {
-                    def services = env.CHANGED_SERVICES.split(',')
-                    for (service in services) {
-                        echo "Testing: ${service}"
-                        sh "./mvnw clean verify -pl ${service}"
-                    }   
+                sh 'whoami'
+                withCredentials([string(credentialsId: 'docker-credentials', variable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
                 }
             }
         }
 
-        stage('Build') {
-            when {
-                expression {
-                    return env.CHANGED_SERVICES != null && env.CHANGED_SERVICES.trim()
-                }
-            }
-            steps {
-                script {
-                    def services = env.CHANGED_SERVICES.split(',')
-                    for (service in services) {
-                        echo "Building: ${service}"
-                        sh "./mvnw -pl ${service} -am package -DskipTests"
-                    }  
-                }
-            }
-        }
+
         stage('Build and push docker image') {
             when {
                 expression {
@@ -91,14 +80,27 @@ pipeline {
             }
             steps {
                 script {
-                    def commitId = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    def imageTag
+                    if (env.TAG_NAME) {
+                        imageTag = env.TAG_NAME
+                    } else {
+                        imageTag = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    }
                     def services = env.CHANGED_SERVICES.split(',')
 
                     for (service in services) {
-                        def imageName = "vuden/${service}:${commitId}"
-                        echo "🚀 Building and pushing image for ${service} with tag ${commitId}"
-                        sh """ ./mvnw clean install -pl ${service} -Dmaven.test.skip=true -P buildDocker 
-                            -Ddocker.image.prefix=${env.DOCKER_REGISTRY} -Ddocker.image.tag=${CONTAINER_TAG} -Dcontainer.build.extraarg=\"--push\""
+                        echo "🚀 Building and pushing image for ${service} with tag ${imageTag}"
+                        // sh "./mvnw clean install -pl ${service} -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName}"
+                        //sh "cd ${service} && ../mvnw clean install -P BuilDocker "
+                        sh "./mvnw clean install -pl ${service} -DskipTests"   
+                        sh """
+                            cd ${service} && \\
+                            docker build \\
+                            -t ${DOCKER_USER}/${service}:${imageTag} \\
+                            -f ../docker/Dockerfile \\
+                            --build-arg ARTIFACT_NAME=target/${service}-3.4.1 \\
+                            --build-arg EXPOSED_PORT=8080 .
+                            docker push ${DOCKER_USER}/${service}:${imageTag}
                         """
                     }
                 }
