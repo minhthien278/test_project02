@@ -71,11 +71,7 @@ pipeline {
 
 
         stage('Build and push docker image') {
-            when {
-                expression {
-                    return env.CHANGED_SERVICES != null && env.CHANGED_SERVICES.trim()
-                }
-            }
+            
             steps {
                 script {
                     def imageTag
