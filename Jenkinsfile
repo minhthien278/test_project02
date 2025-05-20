@@ -80,7 +80,7 @@ pipeline {
             }
             steps {
                 script {
-                    def imageTag;
+                    def imageTag
                     if (env.TAG_NAME) {
                         imageTag = env.TAG_NAME
                     } else {
@@ -90,7 +90,6 @@ pipeline {
                     def services = env.CHANGED_SERVICES.split(',')
 
                     for (service in services) {
-                        def imageName = "vuden/${service}:${commitId}"
                         echo "🚀 Building and pushing image for ${service} with tag ${imageTag}"
                         // sh "./mvnw clean install -pl ${service} -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName}"
                         //sh "cd ${service} && ../mvnw clean install -P BuilDocker "
