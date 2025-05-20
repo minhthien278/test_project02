@@ -86,6 +86,7 @@ pipeline {
                     } else {
                         imageTag = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
                     }
+                    echo "Building and pushing images with tag ${imageTag}"
                     def services = env.CHANGED_SERVICES.split(',')
 
                     for (service in services) {
