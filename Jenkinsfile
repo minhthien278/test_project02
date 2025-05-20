@@ -20,11 +20,12 @@ pipeline {
             }
         }
         stage('Detect Release') {
-            when { expression { return env.TAG_NAME } }
             steps {
                 script {
+                    def tagName =sh (script: " git tag --points-at HEAD", returnStdout: true).trim()
                     echo "A new release found with tag ${env.TAG_NAME}"
                     env.CHANGED_SERVICES = env.SERVICES
+                    end.TAG_NAME = tagName
                 }
             }
         }
