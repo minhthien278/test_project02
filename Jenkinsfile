@@ -86,7 +86,7 @@ pipeline {
                         imageTag = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
                     }
                     if (env.GIT_BRANCH == 'origin/main' || env.BRANCH_NAME == 'main') { 
-                        services = env.SERVICES.split()
+                        services = env.SERVICES.split(',')
                     }
                     services = env.CHANGED_SERVICES.split(',')
 
