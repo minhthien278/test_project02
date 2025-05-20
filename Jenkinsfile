@@ -15,14 +15,19 @@ pipeline {
         DOCKER_USER = 'vuden'
     }
 
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '10'))
-    }
-
     stages {
         stage("Checkout") {
             steps {
                 checkout scm
+            }
+        }
+        stage('Detect Release') {
+            when { expression { return env.TAG_NAME } }
+            steps {
+                script {
+                    echo "A new release found with tag ${env.TAG_NAME}"
+                    env.CHANGED_SERVICES = env.SERVICES
+                }
             }
         }
         stage('Detect Changes') {
@@ -51,7 +56,11 @@ pipeline {
         }
 
         stage('Docker Login') {
-            
+            when {
+                expression {
+                    return env.CHANGED_SERVICES != null && env.CHANGED_SERVICES.trim()
+                }
+            }
             steps {
                 sh 'whoami'
                 withCredentials([string(credentialsId: 'docker-credentials', variable: 'DOCKER_PASS')]) {
@@ -62,7 +71,7 @@ pipeline {
             }
         }
 
-        
+
         stage('Build and push docker image') {
             when {
                 expression {
@@ -71,14 +80,21 @@ pipeline {
             }
             steps {
                 script {
-                    def commitId = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    def imageTag;
+                    if (env.TAG_NAME) {
+                        imageTag = env.TAG_NAME
+                    } else {
+                        imageTag = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    }
                     def services = env.CHANGED_SERVICES.split(',')
 
                     for (service in services) {
                         def imageName = "vuden/${service}:${commitId}"
                         echo "🚀 Building and pushing image for ${service} with tag ${commitId}"
-                        sh "./mvnw clean install -pl ${service} -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName}"
+                        // sh "./mvnw clean install -pl ${service} -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName}"
                         //sh "cd ${service} && ../mvnw clean install -P BuilDocker "
+                        sh "docker build -t ${DOCKER_USER}/${service}:${imageTag} -f ../docker/Dockerfile -- build-arg ARTIFACT_NAME=target/${service}-3.4.1 -- build-arg EXPOSE_PORT=8080" 
+                        sh "docker push ${DOCKER_USER}/${service}:${imageTag}"
                     }
                 }
             }
