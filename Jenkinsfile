@@ -97,7 +97,7 @@ pipeline {
                             cd ${service} && \\
                             docker build \\
                             -t ${DOCKER_USER}/${service}:${imageTag} \\
-                            -f ./docker/Dockerfile \\
+                            -f ../docker/Dockerfile \\
                             --build-arg ARTIFACT_NAME=target/${service}-3.4.1 \\
                             --build-arg EXPOSED_PORT=8080 .
                             docker push ${DOCKER_USER}/${service}:${imageTag}
