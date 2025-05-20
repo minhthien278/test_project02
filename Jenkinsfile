@@ -86,7 +86,6 @@ pipeline {
                     } else {
                         imageTag = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
                     }
-                    echo "Building and pushing images with tag ${imageTag}"
                     def services = env.CHANGED_SERVICES.split(',')
 
                     for (service in services) {
@@ -96,7 +95,7 @@ pipeline {
                         sh """
                             docker build \\
                             -t ${DOCKER_USER}/${service}:${imageTag} \\
-                            -f ../docker/Dockerfile \\
+                            -f ./docker/Dockerfile \\
                             --build-arg ARTIFACT_NAME=target/${service}-3.4.1 \\
                             --build-arg EXPOSED_PORT=8080 .
                             docker push ${DOCKER_USER}/${service}:${imageTag}
