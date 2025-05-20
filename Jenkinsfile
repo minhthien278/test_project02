@@ -92,6 +92,7 @@ pipeline {
                         echo "🚀 Building and pushing image for ${service} with tag ${imageTag}"
                         // sh "./mvnw clean install -pl ${service} -P buildDocker -Ddocker.image.prefix=${env.DOCKER_USER} -Ddocker.image.tag=${imageName}"
                         //sh "cd ${service} && ../mvnw clean install -P BuilDocker "
+                        sh "./mvnw clean package -pl ${service} -DskipTests"   
                         sh """
                             docker build \\
                             -t ${DOCKER_USER}/${service}:${imageTag} \\
