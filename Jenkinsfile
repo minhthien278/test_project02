@@ -88,7 +88,7 @@ pipeline {
                     if (env.GIT_BRANCH == 'origin/main' || env.BRANCH_NAME == 'main') { 
                         services = env.SERVICES.split(',')
                     }
-                    services = env.CHANGED_SERVICES.split(',')
+                    else services = env.CHANGED_SERVICES.split(',')
 
                     for (service in services) {
                         echo "🚀 Building and pushing image for ${service} with tag ${imageTag}"
