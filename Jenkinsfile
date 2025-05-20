@@ -29,6 +29,7 @@ pipeline {
             }
         }
         stage('Detect Changes') {
+            when { expression { return !env.TAG_NAME } }
             steps {
                 script {
                     sh "git fetch origin main:refs/remotes/origin/main"
@@ -54,11 +55,6 @@ pipeline {
         }
 
         stage('Docker Login') {
-            when {
-                expression {
-                    return env.CHANGED_SERVICES != null && env.CHANGED_SERVICES.trim()
-                }
-            }
             steps {
                 sh 'whoami'
                 withCredentials([string(credentialsId: 'docker-credentials', variable: 'DOCKER_PASS')]) {
@@ -68,10 +64,7 @@ pipeline {
                 }
             }
         }
-
-
         stage('Build and push docker image') {
-            
             steps {
                 script {
                     def imageTag
@@ -81,7 +74,6 @@ pipeline {
                     } else {
                         imageTag = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
                     }
-                    echo "${env.SERVICES}"
                     if (env.GIT_BRANCH == 'origin/main' || env.BRANCH_NAME == 'main') { 
                         services = env.SERVICES.split()
                     }
